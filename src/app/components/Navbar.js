@@ -77,28 +77,28 @@ export const Navbar = () => {
         </div>
 
         {/* Menu Section - Positioned below the bars */}
-        <div className={`home fixed w-80 mt-16 mr-8 right-0`}>
+        <div className={`home fixed w-80 mt-16 mr-8 right-0 border-4 border-zinc-500 rounded-3xl`}>
           <ul className="flex flex-col w-full bg-white rounded-3xl">
             <li className="inline-block text-2xl text-center py-5 hover:text-zinc-500">
               <Link href={'/'}>Home</Link>
             </li>
-            <div className="inline-block h-[.5px] w-full bg-black"></div>
+            <div className="inline-block h-[.5px] w-full bg-zinc-500"></div>
             <li className="inline-block text-2xl text-center py-5 hover:text-zinc-500">
               <Link href={'#'}>Photo Collage</Link>
             </li>
-            <div className="inline-block h-[.5px] w-full bg-black"></div>
+            <div className="inline-block h-[.5px] w-full bg-zinc-500"></div>
             <li className="inline-block text-2xl text-center py-5 hover:text-zinc-500">
-              <Link href={'#'}>Collection</Link>
+              <Link href={'/collection'}>Collection</Link>
             </li>
-            <div className="inline-block h-[.5px] w-full bg-black"></div>
+            <div className="inline-block h-[.5px] w-full bg-zinc-500"></div>
             <li className="inline-block text-2xl text-center py-5 hover:text-zinc-500">
               <Link href={'#'}>About</Link>
             </li>
-            <div className="inline-block h-[.5px] w-full bg-black"></div>
+            <div className="inline-block h-[.5px] w-full bg-zinc-500"></div>
             <li className="inline-block text-2xl text-center py-5 hover:text-zinc-500">
               <Link href="/contacts">Contact</Link>
             </li>
-            <div className="inline-block h-[.5px] w-full bg-black"></div>
+            <div className="inline-block h-[.5px] w-full bg-zinc-500"></div>
             <div className="text-center mt-6 space-x-4 pb-6">
               <button className="text-xl text-slate-800 bg-green-300 px-6 py-2 rounded-full hover:bg-green-400">Log in</button>
               <button className="text-xl text-slate-800 bg-green-100 px-6 py-2 rounded-full border-2 border-green-300 hover:bg-green-200">Sign Up</button>
