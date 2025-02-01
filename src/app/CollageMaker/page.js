@@ -1,11 +1,12 @@
 'use client'
 
-import React, { useState, useRef } from 'react';
-import { Navbar } from '../components/Navbar'
-import { default as Card } from '../components/Card'
-import { default as CardContent } from '../components/CardContent'
-import { default as Button } from '../components/Button'
+import React, { useState, useRef, useEffect } from 'react';
+import { Navbar } from '../components/Navbar';
+import { default as Card } from '../components/Card';
+import { default as CardContent } from '../components/CardContent';
+import { default as Button } from '../components/Button';
 import { UploadCloud } from 'lucide-react';
+import gsap from 'gsap';
 
 const UltimateCollage = () => {
   const [images, setImages] = useState([]);
@@ -15,6 +16,23 @@ const UltimateCollage = () => {
   const [imageStyles, setImageStyles] = useState({});
   const fileInputRef = useRef(null);
   const containerRef = useRef(null);
+  const imageRefs = useRef([]);
+
+  useEffect(() => {
+    // Fade-in effect for the collage container
+    gsap.from(containerRef.current, { opacity: 0, duration: 1, ease: 'power4.out' });
+
+    // Fade-in effect for images
+    images.forEach((image, index) => {
+      gsap.from(imageRefs.current[index], {
+        opacity: 0,
+        y: 30,
+        delay: index * 0.2,
+        duration: 1,
+        ease: 'power4.out',
+      });
+    });
+  }, [images]);
 
   const handleImageUpload = (event) => {
     const files = Array.from(event.target.files);
@@ -185,6 +203,7 @@ const UltimateCollage = () => {
                   {images.map((image, index) => (
                     <div
                       key={image.id}
+                      ref={(el) => imageRefs.current[index] = el} // Set ref for each image
                       className={`absolute ${index === 0 ? 'top-0 left-0' : index === 1 ? 'top-0 right-0' : index === 2 ? 'bottom-0 left-0' : 'bottom-0 right-0'}`}
                       style={{
                         width: `${index < 2 ? splits.vertical : 100 - splits.vertical}%`,
@@ -245,24 +264,14 @@ const UltimateCollage = () => {
                       cursor: isDragging?.type === 'gap' ? 'grabbing' : 'grab'
                     }}
                   >
-                    <div className="w-4 h-4 border-2 border-gray-400 rounded" />
+                    <div className="w-4 h-4 border-2 border-blue-500 rounded-full"></div>
                   </div>
                 </div>
               )}
             </div>
-            
-            <div className="mt-4 text-sm text-gray-500 text-center">
-              • Drag divider lines to adjust image spaces
-              • Drag corner handles to resize individual images
-              • Drag center handle to adjust gaps between images
-            </div>
-            
-            {/* Finish Button */}
-            <div className="mt-6 text-center">
-              <Button onClick={handleFinish} className="w-full bg-blue-500 hover:bg-blue-600 text-white">
-                Finish Collage
-              </Button>
-            </div>
+          </CardContent>
+          <CardContent className="flex gap-4 justify-end">
+            <Button onClick={handleFinish}>Save Collage</Button>
           </CardContent>
         </Card>
       </div>

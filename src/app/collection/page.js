@@ -1,12 +1,10 @@
-// Collection.js
 'use client'
 
 import React, { useState, useEffect } from 'react';
 import { Navbar } from '../components/Navbar';
-import { default as Card } from '../components/Card';
-import { default as CardContent } from '../components/CardContent';
 import { default as Button } from '../components/Button';
 import Link from 'next/link';
+import gsap from 'gsap';
 
 const Collection = () => {
   const [userData, setUserData] = useState([]); // To hold the saved collages
@@ -15,6 +13,15 @@ const Collection = () => {
     // Load saved collages from localStorage
     const savedCollages = JSON.parse(localStorage.getItem('collages')) || [];
     setUserData(savedCollages);
+
+    // Animate collages after they are loaded
+    gsap.from('.collage-item', {
+      opacity: 0,
+      y: 30, // Slide-up effect
+      stagger: 0.2,
+      duration: 1,
+      ease: 'power4.out',
+    });
   }, []);
 
   const handleDeleteCollage = (index) => {
@@ -48,7 +55,7 @@ const Collection = () => {
           userData.map((collage, index) => (
             <div
               key={index}
-              className="flex flex-col items-center text-center justify-center border-2 border-black rounded-3xl mt-24 ml-24 h-[25vw]"
+              className="collage-item flex flex-col items-center text-center justify-center border-2 border-black rounded-3xl mt-24 ml-24 h-[25vw] opacity-0" // Adding opacity-0 initially for fade-in
             >
               <h1>Collage {index + 1}</h1>
               {/* Render the images or collage preview */}
@@ -72,7 +79,7 @@ const Collection = () => {
                   </div>
                 </Link>
               </div>
-              
+
               {/* Delete button */}
               <Button
                 onClick={() => handleDeleteCollage(index)}
