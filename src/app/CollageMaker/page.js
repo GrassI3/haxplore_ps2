@@ -22,10 +22,26 @@ const UltimateCollage = () => {
       id: Math.random().toString(36).substr(2, 9),
       url: URL.createObjectURL(file)
     }));
-    setImages([...images, ...newImages].slice(0, 4));
+    setImages(prevImages => [...prevImages, ...newImages].slice(0, 4)); // Prevent exceeding 4 images
   };
 
-  // Divider dragging
+  const storeData = () => {
+    // Store the data in localStorage
+    const collageData = {
+      images,
+      splits,
+      gap,
+    };
+    const savedCollages = JSON.parse(localStorage.getItem('collages')) || [];
+    savedCollages.push(collageData);
+    localStorage.setItem('collages', JSON.stringify(savedCollages));
+    alert('Collage saved!');
+  };
+
+  const handleFinish = () => {
+    storeData(); // Save the current collage
+  };
+
   const handleDividerStart = (e, type) => {
     e.preventDefault();
     setIsDragging({ type: type, isDiv: true });
@@ -53,7 +69,6 @@ const UltimateCollage = () => {
     }
   };
 
-  // Gap control
   const handleGapStart = (e) => {
     e.preventDefault();
     setIsDragging({ type: 'gap', startX: e.clientX, startGap: gap });
@@ -66,7 +81,6 @@ const UltimateCollage = () => {
     setGap(newGap);
   };
 
-  // Image resizing
   const handleResizeStart = (e, imageId, corner) => {
     e.stopPropagation();
     const currentStyle = imageStyles[imageId] || { scale: 1, translateX: 0, translateY: 0 };
@@ -132,214 +146,126 @@ const UltimateCollage = () => {
   };
 
   return (
-    <div> <Navbar/>
-    <div className="w-full max-w-2xl mx-auto pt-36 p-16">
-      <Card>
-        <CardContent className="p-4">
-          <Button 
-            onClick={() => fileInputRef.current.click()}
-            className="mb-4 flex items-center gap-2"
-          >
-            <UploadCloud size={16} />
-            Upload Images ({images.length}/4)
-          </Button>
-          
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleImageUpload}
-            multiple
-            accept="image/*"
-            className="hidden"
-          />
-          
-          <div 
-            ref={containerRef}
-            className="relative bg-gray-100 rounded-lg overflow-hidden"
-            style={{ height: '500px' }}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleDragEnd}
-            onMouseLeave={handleDragEnd}
-          >
-            {images.length === 0 ? (
-              <div className="flex items-center justify-center h-full text-gray-500">
-                <p>Upload up to 4 images to create a collage</p>
-              </div>
-            ) : (
-              <div className="relative h-full" style={{ padding: `${gap}px` }}>
-                {/* Top left */}
-                <div 
-                  className="absolute top-0 left-0"
-                  style={{
-                    width: `${splits.vertical}%`,
-                    height: `${splits.horizontal}%`,
-                    padding: `${gap}px`
-                  }}
-                >
-                  {images[0] && (
-                    <div className="relative w-full h-full overflow-hidden rounded-lg">
-                      <img
-                        src={images[0].url}
-                        alt="Collage item 1"
-                        className="w-full h-full object-cover transition-transform"
-                        style={{
-                          transform: `scale(${imageStyles[images[0].id]?.scale || 1}) 
-                                    translate(${imageStyles[images[0].id]?.translateX || 0}px, 
-                                             ${imageStyles[images[0].id]?.translateY || 0}px)`
-                        }}
-                      />
-                      {corners.map(corner => (
-                        <div
-                          key={corner}
-                          className={getCornerStyle(corner)}
-                          onMouseDown={(e) => handleResizeStart(e, images[0].id, corner)}
+    <div>
+      <Navbar/>
+      <div className="w-full max-w-2xl mx-auto pt-36 p-16">
+        <Card>
+          <CardContent className="p-4">
+            <Button 
+              onClick={() => fileInputRef.current.click()}
+              className="mb-4 flex items-center gap-2"
+            >
+              <UploadCloud size={16} />
+              Upload Images ({images.length}/4)
+            </Button>
+            
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImageUpload}
+              multiple
+              accept="image/*"
+              className="hidden"
+            />
+            
+            <div 
+              ref={containerRef}
+              className="relative bg-gray-100 rounded-lg overflow-hidden"
+              style={{ height: '500px' }}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleDragEnd}
+              onMouseLeave={handleDragEnd}
+            >
+              {images.length === 0 ? (
+                <div className="flex items-center justify-center h-full text-gray-500">
+                  <p>Upload up to 4 images to create a collage</p>
+                </div>
+              ) : (
+                <div className="relative h-full" style={{ padding: `${gap}px` }}>
+                  {images.map((image, index) => (
+                    <div
+                      key={image.id}
+                      className={`absolute ${index === 0 ? 'top-0 left-0' : index === 1 ? 'top-0 right-0' : index === 2 ? 'bottom-0 left-0' : 'bottom-0 right-0'}`}
+                      style={{
+                        width: `${index < 2 ? splits.vertical : 100 - splits.vertical}%`,
+                        height: `${index % 2 === 0 ? splits.horizontal : 100 - splits.horizontal}%`,
+                        padding: `${gap}px`
+                      }}
+                    >
+                      <div className="relative w-full h-full overflow-hidden rounded-lg">
+                        <img
+                          src={image.url}
+                          alt={`Collage item ${index + 1}`}
+                          className="w-full h-full object-cover transition-transform"
+                          style={{
+                            transform: `scale(${imageStyles[image.id]?.scale || 1}) 
+                                        translate(${imageStyles[image.id]?.translateX || 0}px, 
+                                                 ${imageStyles[image.id]?.translateY || 0}px)`
+                          }}
                         />
-                      ))}
+                        {corners.map(corner => (
+                          <div
+                            key={corner}
+                            className={getCornerStyle(corner)}
+                            onMouseDown={(e) => handleResizeStart(e, image.id, corner)}
+                          />
+                        ))}
+                      </div>
                     </div>
-                  )}
-                </div>
+                  ))}
 
-                {/* Top right */}
-                <div 
-                  className="absolute top-0 right-0"
-                  style={{
-                    width: `${100 - splits.vertical}%`,
-                    height: `${splits.horizontal}%`,
-                    padding: `${gap}px`
-                  }}
-                >
-                  {images[1] && (
-                    <div className="relative w-full h-full overflow-hidden rounded-lg">
-                      <img
-                        src={images[1].url}
-                        alt="Collage item 2"
-                        className="w-full h-full object-cover transition-transform"
-                        style={{
-                          transform: `scale(${imageStyles[images[1].id]?.scale || 1}) 
-                                    translate(${imageStyles[images[1].id]?.translateX || 0}px, 
-                                             ${imageStyles[images[1].id]?.translateY || 0}px)`
-                        }}
-                      />
-                      {corners.map(corner => (
-                        <div
-                          key={corner}
-                          className={getCornerStyle(corner)}
-                          onMouseDown={(e) => handleResizeStart(e, images[1].id, corner)}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
+                  {/* Dividers */}
+                  <div
+                    className="absolute top-0 bottom-0 w-1 bg-white cursor-col-resize hover:bg-blue-400 hover:w-2 transition-all z-10"
+                    style={{ 
+                      left: `${splits.vertical}%`,
+                      transform: 'translateX(-50%)',
+                      opacity: isDragging?.type === 'vertical' ? 1 : 0.5
+                    }}
+                    onMouseDown={(e) => handleDividerStart(e, 'vertical')}
+                  />
+                  
+                  <div
+                    className="absolute left-0 right-0 h-1 bg-white cursor-row-resize hover:bg-blue-400 hover:h-2 transition-all z-10"
+                    style={{ 
+                      top: `${splits.horizontal}%`,
+                      transform: 'translateY(-50%)',
+                      opacity: isDragging?.type === 'horizontal' ? 1 : 0.5
+                    }}
+                    onMouseDown={(e) => handleDividerStart(e, 'horizontal')}
+                  />
 
-                {/* Bottom left */}
-                <div 
-                  className="absolute bottom-0 left-0"
-                  style={{
-                    width: `${splits.vertical}%`,
-                    height: `${100 - splits.horizontal}%`,
-                    padding: `${gap}px`
-                  }}
-                >
-                  {images[2] && (
-                    <div className="relative w-full h-full overflow-hidden rounded-lg">
-                      <img
-                        src={images[2].url}
-                        alt="Collage item 3"
-                        className="w-full h-full object-cover transition-transform"
-                        style={{
-                          transform: `scale(${imageStyles[images[2].id]?.scale || 1}) 
-                                    translate(${imageStyles[images[2].id]?.translateX || 0}px, 
-                                             ${imageStyles[images[2].id]?.translateY || 0}px)`
-                        }}
-                      />
-                      {corners.map(corner => (
-                        <div
-                          key={corner}
-                          className={getCornerStyle(corner)}
-                          onMouseDown={(e) => handleResizeStart(e, images[2].id, corner)}
-                        />
-                      ))}
-                    </div>
-                  )}
+                  {/* Gap control handle */}
+                  <div
+                    className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 
+                             bg-white rounded-full shadow-lg cursor-move flex items-center justify-center
+                             hover:bg-blue-50 active:bg-blue-100 z-30"
+                    onMouseDown={handleGapStart}
+                    style={{ 
+                      cursor: isDragging?.type === 'gap' ? 'grabbing' : 'grab'
+                    }}
+                  >
+                    <div className="w-4 h-4 border-2 border-gray-400 rounded" />
+                  </div>
                 </div>
-
-                {/* Bottom right */}
-                <div 
-                  className="absolute bottom-0 right-0"
-                  style={{
-                    width: `${100 - splits.vertical}%`,
-                    height: `${100 - splits.horizontal}%`,
-                    padding: `${gap}px`
-                  }}
-                >
-                  {images[3] && (
-                    <div className="relative w-full h-full overflow-hidden rounded-lg">
-                      <img
-                        src={images[3].url}
-                        alt="Collage item 4"
-                        className="w-full h-full object-cover transition-transform"
-                        style={{
-                          transform: `scale(${imageStyles[images[3].id]?.scale || 1}) 
-                                    translate(${imageStyles[images[3].id]?.translateX || 0}px, 
-                                             ${imageStyles[images[3].id]?.translateY || 0}px)`
-                        }}
-                      />
-                      {corners.map(corner => (
-                        <div
-                          key={corner}
-                          className={getCornerStyle(corner)}
-                          onMouseDown={(e) => handleResizeStart(e, images[3].id, corner)}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Dividers */}
-                <div
-                  className="absolute top-0 bottom-0 w-1 bg-white cursor-col-resize hover:bg-blue-400 hover:w-2 transition-all z-10"
-                  style={{ 
-                    left: `${splits.vertical}%`,
-                    transform: 'translateX(-50%)',
-                    opacity: isDragging?.type === 'vertical' ? 1 : 0.5
-                  }}
-                  onMouseDown={(e) => handleDividerStart(e, 'vertical')}
-                />
-                
-                <div
-                  className="absolute left-0 right-0 h-1 bg-white cursor-row-resize hover:bg-blue-400 hover:h-2 transition-all z-10"
-                  style={{ 
-                    top: `${splits.horizontal}%`,
-                    transform: 'translateY(-50%)',
-                    opacity: isDragging?.type === 'horizontal' ? 1 : 0.5
-                  }}
-                  onMouseDown={(e) => handleDividerStart(e, 'horizontal')}
-                />
-
-                {/* Gap control handle */}
-                <div
-                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 
-                           bg-white rounded-full shadow-lg cursor-move flex items-center justify-center
-                           hover:bg-blue-50 active:bg-blue-100 z-30"
-                  onMouseDown={handleGapStart}
-                  style={{ 
-                    cursor: isDragging?.type === 'gap' ? 'grabbing' : 'grab'
-                  }}
-                >
-                  <div className="w-4 h-4 border-2 border-gray-400 rounded" />
-                </div>
-              </div>
-            )}
-          </div>
-          
-          <div className="mt-4 text-sm text-gray-500 text-center">
-            • Drag divider lines to adjust image spaces
-            • Drag corner handles to resize individual images
-            • Drag center handle to adjust gaps between images
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+              )}
+            </div>
+            
+            <div className="mt-4 text-sm text-gray-500 text-center">
+              • Drag divider lines to adjust image spaces
+              • Drag corner handles to resize individual images
+              • Drag center handle to adjust gaps between images
+            </div>
+            
+            {/* Finish Button */}
+            <div className="mt-6 text-center">
+              <Button onClick={handleFinish} className="w-full bg-blue-500 hover:bg-blue-600 text-white">
+                Finish Collage
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
