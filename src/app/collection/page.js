@@ -7,7 +7,7 @@ import { default as CardContent } from '../components/CardContent';
 import { default as Button } from '../components/Button';
 import { UploadCloud } from 'lucide-react';
 
-const UltimateCollage = () => {
+const collection = () => {
     const [images, setImages] = useState([]);
     const [splits, setSplits] = useState({ vertical: 50, horizontal: 50 });
     const [gap, setGap] = useState(8);
@@ -51,4 +51,4 @@ const UltimateCollage = () => {
     );
 };
 
-export default UltimateCollage;
+export default collection;
