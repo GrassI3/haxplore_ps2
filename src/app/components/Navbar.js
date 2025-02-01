@@ -84,7 +84,7 @@ export const Navbar = () => {
             </li>
             <div className="inline-block h-[.5px] w-full bg-zinc-500"></div>
             <li className="inline-block text-2xl text-center py-5 hover:text-zinc-500">
-              <Link href={'#'}>Photo Collage</Link>
+              <Link href="/CollageMaker">Collage Maker</Link>
             </li>
             <div className="inline-block h-[.5px] w-full bg-zinc-500"></div>
             <li className="inline-block text-2xl text-center py-5 hover:text-zinc-500">
